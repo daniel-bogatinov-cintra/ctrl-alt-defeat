@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Retro {
+  id        String   @id @default(uuid())
+  shareId   String   @unique @default(uuid())
+  title     String
+  teamName  String?
+  createdAt DateTime @default(now())
+  status    String   @default("active")
+
+  participants Participant[]
+  memes        MemeEntry[]
+  lanes        Lane[]
+}
+
+model Lane {
+  id      String @id @default(uuid())
+  retroId String
+  retro   Retro  @relation(fields: [retroId], references: [id], onDelete: Cascade)
+  title   String
+  order   Int
+  memes   MemeEntry[]
+}
+
+model Participant {
+  id          String   @id @default(uuid())
+  retroId     String
+  retro       Retro    @relation(fields: [retroId], references: [id], onDelete: Cascade)
+  displayName String
+  avatarColor String?
+  createdAt   DateTime @default(now())
+  memes       MemeEntry[]
+}
+
+model MemeTemplate {
+  id          String   @id @default(uuid())
+  memegenId   String   @unique
+  displayName String
+  previewUrl  String
+  lines       Int      @default(2)
+  createdAt   DateTime @default(now())
+}
+
+model MemeEntry {
+  id                String   @id @default(uuid())
+  retroId           String
+  retro             Retro    @relation(fields: [retroId], references: [id], onDelete: Cascade)
+  participantId     String
+  participant       Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  laneId            String?
+  lane              Lane?    @relation(fields: [laneId], references: [id])
+  templateId        String
+  topText           String?
+  bottomText        String?
+  generatedImageUrl String
+  createdAt         DateTime @default(now())
+  reactions         String   @default("{}")
+}
