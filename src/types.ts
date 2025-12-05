@@ -29,6 +29,7 @@ export interface MemeEntry {
     bottomText?: string;
     generatedImageUrl?: string;
     textContent?: string;
+    description?: string;
     participantId: string;
     participant?: Participant;
     laneId: string;

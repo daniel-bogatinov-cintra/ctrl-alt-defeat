@@ -9,7 +9,7 @@ export async function POST(
     try {
         const { id } = await params;
         const body = await request.json();
-        const { templateId, lines, participantId, laneId, textContent } = body;
+        const { templateId, lines, participantId, laneId, textContent, description } = body;
 
         if (!participantId || (!templateId && !textContent)) {
             return NextResponse.json({ error: 'Missing required fields (participantId and either templateId or textContent)' }, { status: 400 });
@@ -43,6 +43,7 @@ export async function POST(
                 topText: imageLines[0] || '',
                 bottomText: imageLines[1] || '',
                 textContent: textContent || null,
+                description: description || null,
                 generatedImageUrl: generatedImageUrl || null,
                 reactions: '{}',
             },

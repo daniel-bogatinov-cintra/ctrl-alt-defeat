@@ -735,28 +735,40 @@ export default function RetroPage() {
                                 </Box>
                             )}
                         </DialogContent>
-                        <DialogActions sx={{ p: 3, pt: 2, bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mr: 'auto' }}>
-                                <Box sx={{
-                                    width: 36, height: 36, borderRadius: '50%',
-                                    bgcolor: viewingMeme.participant?.avatarColor || '#777',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '1rem', fontWeight: 'bold'
-                                }}>
-                                    {viewingMeme.participant?.displayName?.[0] || '?'}
+                        <DialogActions sx={{ p: 3, pt: 2, bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', flexDirection: 'column', alignItems: 'stretch' }}>
+                            {viewingMeme.description && (
+                                <Box sx={{ mb: 2, p: 2, bgcolor: 'rgba(139, 92, 246, 0.1)', borderRadius: 2, border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                                    <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 'bold', textTransform: 'uppercase', mb: 0.5, display: 'block' }}>
+                                        Description
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                        {viewingMeme.description}
+                                    </Typography>
                                 </Box>
-                                <Typography variant="body1" fontWeight="600">
-                                    {viewingMeme.participant?.displayName}
-                                </Typography>
+                            )}
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    <Box sx={{
+                                        width: 36, height: 36, borderRadius: '50%',
+                                        bgcolor: viewingMeme.participant?.avatarColor || '#777',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '1rem', fontWeight: 'bold'
+                                    }}>
+                                        {viewingMeme.participant?.displayName?.[0] || '?'}
+                                    </Box>
+                                    <Typography variant="body1" fontWeight="600">
+                                        {viewingMeme.participant?.displayName}
+                                    </Typography>
+                                </Box>
+                                <Button
+                                    onClick={() => setViewingMeme(null)}
+                                    variant="contained"
+                                    size="large"
+                                    sx={{ borderRadius: 2, px: 4, fontWeight: 'bold' }}
+                                >
+                                    Close
+                                </Button>
                             </Box>
-                            <Button
-                                onClick={() => setViewingMeme(null)}
-                                variant="contained"
-                                size="large"
-                                sx={{ borderRadius: 2, px: 4, fontWeight: 'bold' }}
-                            >
-                                Close
-                            </Button>
                         </DialogActions>
                     </>
                 )}

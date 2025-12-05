@@ -17,7 +17,7 @@ const fetcher = (url: string) => fetch(url).then(res => res.json());
 interface Props {
     open: boolean;
     onClose: () => void;
-    onSubmit: (data: { templateId: string, lines: string[], laneId: string }) => Promise<void>;
+    onSubmit: (data: { templateId: string, lines: string[], laneId: string, description?: string }) => Promise<void>;
     lanes: Lane[];
     defaultLaneId?: string;
 }
@@ -31,6 +31,7 @@ export default function MemeCreator({ open, onClose, onSubmit, lanes, defaultLan
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
     const [lines, setLines] = useState<string[]>(['', '']);
     const [laneId, setLaneId] = useState(defaultLaneId || '');
+    const [description, setDescription] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -61,12 +62,14 @@ export default function MemeCreator({ open, onClose, onSubmit, lanes, defaultLan
             await onSubmit({
                 templateId: selectedTemplate.id,
                 lines,
-                laneId
+                laneId,
+                description: description.trim() || undefined
             });
             onClose();
             // Reset fields
             setLines(['', '']);
             setSelectedTemplate(null);
+            setDescription('');
         } catch (e) {
             console.error(e);
         } finally {
@@ -168,6 +171,16 @@ export default function MemeCreator({ open, onClose, onSubmit, lanes, defaultLan
                                             fullWidth
                                         />
                                     ))}
+                                    <TextField
+                                        label="Description (Optional)"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        fullWidth
+                                        multiline
+                                        rows={2}
+                                        placeholder="Add context or explanation (only visible when viewing the meme)"
+                                        helperText="This will only be shown in the full-size view"
+                                    />
                                 </Stack>
                             )}
                         </Stack>

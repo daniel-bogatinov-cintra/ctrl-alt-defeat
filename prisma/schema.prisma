@@ -64,6 +64,7 @@ model MemeEntry {
   topText           String?
   bottomText        String?
   textContent       String?  // For action items
+  description       String?  // Optional description for memes
   generatedImageUrl String?
   createdAt         DateTime @default(now())
   
