@@ -273,16 +273,6 @@ export default function RetroPage() {
                                     }
                                 }
                             }}>
-                                {filteredMemes[lane.id]?.map((meme: MemeEntry) => (
-                                    <MemeCard
-                                        key={meme.id}
-                                        meme={meme}
-                                        onReact={(emoji) => handleReact(meme.id, emoji)}
-                                        onDelete={() => handleDelete(meme.id)}
-                                        onClick={() => setViewingMeme(meme)}
-                                    />
-                                ))}
-
                                 {lane.type === 'action' ? (
                                     <Button
                                         variant="outlined"
@@ -316,6 +306,16 @@ export default function RetroPage() {
                                         Add Meme
                                     </Button>
                                 )}
+
+                                {filteredMemes[lane.id]?.map((meme: MemeEntry) => (
+                                    <MemeCard
+                                        key={meme.id}
+                                        meme={meme}
+                                        onReact={(emoji) => handleReact(meme.id, emoji)}
+                                        onDelete={() => handleDelete(meme.id)}
+                                        onClick={() => setViewingMeme(meme)}
+                                    />
+                                ))}
                             </Stack>
                         </Box>
                     ))}

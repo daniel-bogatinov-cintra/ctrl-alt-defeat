@@ -34,10 +34,12 @@ export default function MemeCreator({ open, onClose, onSubmit, lanes, defaultLan
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        if (lanes.length > 0 && !laneId) {
+        if (open && defaultLaneId) {
+            setLaneId(defaultLaneId);
+        } else if (lanes.length > 0 && !laneId) {
             setLaneId(lanes[0].id);
         }
-    }, [lanes, laneId]);
+    }, [open, defaultLaneId, lanes, laneId]);
 
     const handleTemplateChange = (_: any, newValue: Template | null) => {
         setSelectedTemplate(newValue);
