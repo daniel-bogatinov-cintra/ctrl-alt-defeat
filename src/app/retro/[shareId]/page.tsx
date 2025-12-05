@@ -964,7 +964,7 @@ export default function RetroPage() {
             <Dialog
                 open={focusModeOpen}
                 onClose={() => setFocusModeOpen(false)}
-                maxWidth="lg"
+                maxWidth="xl"
                 fullWidth
                 PaperProps={{
                     sx: {
@@ -972,7 +972,8 @@ export default function RetroPage() {
                         bgcolor: 'background.paper',
                         backgroundImage: 'none',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        m: 2
+                        m: 1,
+                        maxHeight: '95vh'
                     }
                 }}
             >
@@ -997,7 +998,21 @@ export default function RetroPage() {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                minHeight: 400
+                                minHeight: 400,
+                                '&::-webkit-scrollbar': {
+                                    width: '8px',
+                                },
+                                '&::-webkit-scrollbar-track': {
+                                    background: 'rgba(255,255,255,0.05)',
+                                    borderRadius: '4px',
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                    background: 'rgba(139, 92, 246, 0.3)',
+                                    borderRadius: '4px',
+                                    '&:hover': {
+                                        background: 'rgba(139, 92, 246, 0.5)',
+                                    }
+                                }
                             }}>
                                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'center' }}>
                                     Meme {focusMemeIndex + 1} of {sortedMemesByVotes.length} • {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
@@ -1011,7 +1026,7 @@ export default function RetroPage() {
                                         sx={{
                                             width: '100%',
                                             height: 'auto',
-                                            maxHeight: '60vh',
+                                            maxHeight: '70vh',
                                             maxWidth: '100%',
                                             objectFit: 'contain',
                                             bgcolor: '#000',
@@ -1056,6 +1071,34 @@ export default function RetroPage() {
                                         </Typography>
                                     </Box>
                                 )}
+
+                                {/* Vote Display */}
+                                <Box sx={{ mt: 3, display: 'flex', gap: 1.5, flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
+                                    {['👀', '😡', '😕'].map(emoji => {
+                                        const count = reactions[emoji] || 0;
+                                        return (
+                                            <Box
+                                                key={emoji}
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 0.75,
+                                                    px: 2,
+                                                    py: 1,
+                                                    borderRadius: 2,
+                                                    bgcolor: count > 0 ? 'rgba(139, 92, 246, 0.2)' : 'rgba(255,255,255,0.05)',
+                                                    border: '1px solid',
+                                                    borderColor: count > 0 ? 'primary.main' : 'rgba(255,255,255,0.1)',
+                                                }}
+                                            >
+                                                <Typography sx={{ fontSize: '1.5rem' }}>{emoji}</Typography>
+                                                <Typography variant="h6" fontWeight="bold" color={count > 0 ? 'primary.main' : 'text.secondary'}>
+                                                    {count}
+                                                </Typography>
+                                            </Box>
+                                        );
+                                    })}
+                                </Box>
                             </DialogContent>
                             <DialogActions sx={{ p: 3, pt: 2, justifyContent: 'space-between', bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                                 <Button

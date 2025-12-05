@@ -22,46 +22,30 @@ export async function POST(
             return NextResponse.json({ error: 'Meme not found' }, { status: 404 });
         }
 
-        // Check if already reacted
-        const existing = await prisma.reaction.findUnique({
+        // Check vote limit
+        const totalVotes = await prisma.reaction.count({
             where: {
-                memeId_participantId_emoji: {
-                    memeId: id,
-                    participantId,
-                    emoji: reaction
-                }
+                participantId,
+                meme: { retroId: meme.retroId }
             }
         });
 
-        const reactionsMap = JSON.parse(meme.reactions || '{}');
-
-        if (existing) {
-            // Remove (Toggle Off)
-            await prisma.reaction.delete({ where: { id: existing.id } });
-            reactionsMap[reaction] = Math.max(0, (reactionsMap[reaction] || 0) - 1);
-        } else {
-            // Check Limit
-            const totalVotes = await prisma.reaction.count({
-                where: {
-                    participantId,
-                    meme: { retroId: meme.retroId }
-                }
-            });
-
-            if (totalVotes >= meme.retro.maxVotesPerParticipant) {
-                return NextResponse.json({ error: `Vote limit of ${meme.retro.maxVotesPerParticipant} reached` }, { status: 403 });
-            }
-
-            // Create
-            await prisma.reaction.create({
-                data: {
-                    memeId: id,
-                    participantId,
-                    emoji: reaction
-                }
-            });
-            reactionsMap[reaction] = (reactionsMap[reaction] || 0) + 1;
+        if (totalVotes >= meme.retro.maxVotesPerParticipant) {
+            return NextResponse.json({ error: `Vote limit of ${meme.retro.maxVotesPerParticipant} reached` }, { status: 403 });
         }
+
+        // Always create a new reaction (allow multiple votes with same emoji)
+        await prisma.reaction.create({
+            data: {
+                memeId: id,
+                participantId,
+                emoji: reaction
+            }
+        });
+
+        // Update reactions count
+        const reactionsMap = JSON.parse(meme.reactions || '{}');
+        reactionsMap[reaction] = (reactionsMap[reaction] || 0) + 1;
 
         const updated = await prisma.memeEntry.update({
             where: { id },
