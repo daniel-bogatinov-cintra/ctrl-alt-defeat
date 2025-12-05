@@ -15,6 +15,7 @@ model Retro {
   createdAt DateTime @default(now())
   status                 String   @default("active")
   maxVotesPerParticipant Int      @default(3)
+  timerExpiresAt         DateTime?  // For discussion timer
 
   participants Participant[]
   memes        MemeEntry[]

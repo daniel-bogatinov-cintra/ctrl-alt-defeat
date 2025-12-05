@@ -16,6 +16,7 @@ export interface Retro {
     title: string;
     teamName?: string;
     maxVotesPerParticipant: number;
+    timerExpiresAt?: string; // ISO date string
     lanes: Lane[];
     memes: MemeEntry[];
     participants: Participant[];

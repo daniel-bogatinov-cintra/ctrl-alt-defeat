@@ -16,6 +16,7 @@ import { Lane, MemeEntry, Participant } from '@/types';
 import MemeCard from '@/components/MemeCard';
 import MemeCreator from '@/components/MemeCreator';
 import ParticipantDialog from '@/components/ParticipantDialog';
+import RetroTimer from '@/components/RetroTimer';
 import { motion } from 'framer-motion';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -31,6 +32,7 @@ export default function RetroPage() {
 
     const [creatorOpen, setCreatorOpen] = useState(false);
     const [voteLimitDialogOpen, setVoteLimitDialogOpen] = useState(false);
+    const [timerFinishedDialogOpen, setTimerFinishedDialogOpen] = useState(false);
     const [currentLaneId, setCurrentLaneId] = useState<string>('');
     const [showShareToast, setShowShareToast] = useState(false);
 
@@ -93,6 +95,20 @@ export default function RetroPage() {
         setShowShareToast(true);
     };
 
+    const handleTimer = async (action: 'start' | 'stop', duration?: number) => {
+        if (!retro) return;
+        await fetch(`/api/retros/${retro.shareId}/timer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action, durationMinutes: duration })
+        });
+        mutate();
+    };
+
+    const handleTimerFinish = () => {
+        setTimerFinishedDialogOpen(true);
+    };
+
     const filteredMemes = useMemo(() => {
         const lanes: Record<string, MemeEntry[]> = {};
         if (retro?.lanes) {
@@ -148,6 +164,12 @@ export default function RetroPage() {
                             )}
                         </Box>
                     </Stack>
+
+                    <RetroTimer
+                        expiresAt={retro.timerExpiresAt}
+                        onAction={handleTimer}
+                        onFinish={handleTimerFinish}
+                    />
 
                     {myParticipant && (() => {
                         const used = myParticipant._count?.reactions || 0;
@@ -291,6 +313,51 @@ export default function RetroPage() {
                         sx={{ borderRadius: 2, fontWeight: 'bold' }}
                     >
                         Got it
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={timerFinishedDialogOpen}
+                onClose={() => setTimerFinishedDialogOpen(false)}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                        backgroundImage: 'none',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        maxWidth: 400
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    color: 'primary.main',
+                    fontWeight: 800,
+                    pb: 1,
+                    fontSize: '1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                }}>
+                    Time's Up! ⏰
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText color="text.secondary" sx={{ fontSize: '1rem', lineHeight: 1.6 }}>
+                        The discussion timer has finished. <br />
+                        Wrap up your thoughts!
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 1 }}>
+                    <Button
+                        onClick={() => setTimerFinishedDialogOpen(false)}
+                        variant="contained"
+                        color="primary"
+                        autoFocus
+                        fullWidth
+                        size="large"
+                        sx={{ borderRadius: 2, fontWeight: 'bold' }}
+                    >
+                        Okay
                     </Button>
                 </DialogActions>
             </Dialog>
