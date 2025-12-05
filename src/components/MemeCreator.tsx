@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-    Dialog, DialogContent, DialogActions, Title,
+    Dialog, DialogContent, DialogActions,
     Button, TextField, Autocomplete, Box, Typography,
     CircularProgress, MenuItem, Select, FormControl, InputLabel,
     Stack, IconButton, DialogTitle, useTheme, useMediaQuery

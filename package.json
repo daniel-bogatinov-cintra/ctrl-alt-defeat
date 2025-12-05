@@ -14,11 +14,11 @@
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
     "@mui/material-nextjs": "^7.3.6",
-    "@prisma/client": "^7.1.0",
+    "@prisma/client": "5.14.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.25",
     "next": "16.0.7",
-    "prisma": "^7.1.0",
+    "prisma": "5.14.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "swr": "^2.3.7"

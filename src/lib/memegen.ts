@@ -30,7 +30,7 @@ export class MemegenClient {
     }
 
     static buildMemeUrl(templateId: string, lines: string[]): string {
-        const escapedLines = lines.map(line => this.escapeText(line));
+        const escapedLines = lines.map(line => MemegenClient.escapeText(line));
         // Join with slash
         const path = escapedLines.length > 0 ? escapedLines.join('/') : '_';
         return `${MEMEGEN_API}/images/${templateId}/${path}.png`;
