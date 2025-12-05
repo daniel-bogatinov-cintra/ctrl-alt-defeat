@@ -6,7 +6,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import {
     Box, Typography, Button, IconButton, Chip, Stack, Fab,
-    Container, AppBar, Toolbar, Avatar, Tooltip, Snackbar
+    Container, AppBar, Toolbar, Avatar, Tooltip, Snackbar,
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
 import ShareIcon from '@mui/icons-material/Share';
 import AddIcon from '@mui/icons-material/Add';
@@ -29,6 +30,7 @@ export default function RetroPage() {
     const [participantsMap, setParticipantsMap] = useLocalStorage<Record<string, Participant>>('meme_retro_participants', {});
 
     const [creatorOpen, setCreatorOpen] = useState(false);
+    const [voteLimitDialogOpen, setVoteLimitDialogOpen] = useState(false);
     const [currentLaneId, setCurrentLaneId] = useState<string>('');
     const [showShareToast, setShowShareToast] = useState(false);
 
@@ -81,7 +83,7 @@ export default function RetroPage() {
         });
 
         if (res.status === 403) {
-            alert("Vote limit reached! You can unvote other cards to regain votes.");
+            setVoteLimitDialogOpen(true);
         }
         mutate();
     };
@@ -250,6 +252,48 @@ export default function RetroPage() {
                 message="Link copied to clipboard!"
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             />
+
+            <Dialog
+                open={voteLimitDialogOpen}
+                onClose={() => setVoteLimitDialogOpen(false)}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                        backgroundImage: 'none',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        maxWidth: 400
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    color: 'error.main',
+                    fontWeight: 800,
+                    pb: 1,
+                    fontSize: '1.5rem'
+                }}>
+                    Vote Limit Reached
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText color="text.secondary" sx={{ fontSize: '1rem', lineHeight: 1.6 }}>
+                        You've used all your votes for this retro. <br />
+                        You can remove your vote from another card to regain it.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 1 }}>
+                    <Button
+                        onClick={() => setVoteLimitDialogOpen(false)}
+                        variant="contained"
+                        color="primary"
+                        autoFocus
+                        fullWidth
+                        size="large"
+                        sx={{ borderRadius: 2, fontWeight: 'bold' }}
+                    >
+                        Got it
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
