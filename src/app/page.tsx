@@ -10,7 +10,8 @@ import {
   TextField,
   Card,
   CardContent,
-  Stack
+  Stack,
+  Slider
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
@@ -20,6 +21,7 @@ export default function LandingPage() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [teamName, setTeamName] = useState('');
+  const [maxVotes, setMaxVotes] = useState(3);
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
@@ -29,7 +31,7 @@ export default function LandingPage() {
       const res = await fetch('/api/retros', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, teamName })
+        body: JSON.stringify({ title, teamName, maxVotes })
       });
       const data = await res.json();
       if (data.shareId) {
@@ -108,6 +110,21 @@ export default function LandingPage() {
                   value={teamName}
                   onChange={(e) => setTeamName(e.target.value)}
                 />
+
+                <Box>
+                  <Typography gutterBottom variant="body2" color="text.secondary">
+                    Max Votes per Person: {maxVotes}
+                  </Typography>
+                  <Slider
+                    value={maxVotes}
+                    onChange={(_, v) => setMaxVotes(v as number)}
+                    min={1}
+                    max={10}
+                    step={1}
+                    marks
+                    valueLabelDisplay="auto"
+                  />
+                </Box>
               </Stack>
 
               <Button

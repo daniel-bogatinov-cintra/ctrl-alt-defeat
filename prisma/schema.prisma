@@ -13,7 +13,8 @@ model Retro {
   title     String
   teamName  String?
   createdAt DateTime @default(now())
-  status    String   @default("active")
+  status                 String   @default("active")
+  maxVotesPerParticipant Int      @default(3)
 
   participants Participant[]
   memes        MemeEntry[]
@@ -37,6 +38,7 @@ model Participant {
   avatarColor String?
   createdAt   DateTime @default(now())
   memes       MemeEntry[]
+  reactions   Reaction[]
 }
 
 model MemeTemplate {
@@ -61,5 +63,24 @@ model MemeEntry {
   bottomText        String?
   generatedImageUrl String
   createdAt         DateTime @default(now())
-  reactions         String   @default("{}")
+  
+  // JSON string for quick counts (legacy/optimistic)
+  reactions         String   @default("{}") 
+  
+  // Relation for precise tracking
+  reactionsList     Reaction[]
+}
+
+model Reaction {
+  id            String      @id @default(uuid())
+  memeId        String
+  meme          MemeEntry   @relation(fields: [memeId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  emoji         String
+  createdAt     DateTime    @default(now())
+
+  @@unique([memeId, participantId, emoji]) // One emoji type per meme per person? Or just one reaction per meme? 
+                                           // User said "amount of votes". Usually 3 votes total.
+                                           // Let's assume distinct reactions per meme are allowed, but total count matters.
 }

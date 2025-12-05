@@ -141,7 +141,7 @@ export default function MemeCreator({ open, onClose, onSubmit, lanes, defaultLan
                                 renderOption={(props, option) => {
                                     const { key, ...otherProps } = props;
                                     return (
-                                        <Box component="li" key={key} {...otherProps} sx={{ gap: 2 }}>
+                                        <Box component="li" key={option.id} {...otherProps} sx={{ gap: 2 }}>
                                             <img
                                                 loading="lazy"
                                                 width="40"

@@ -22,7 +22,24 @@ export class MemegenClient {
                 console.error(`Memegen fetch failed: ${res.status}`);
                 return [];
             }
-            return res.json();
+            const templates = await res.json() as Template[];
+
+            // Deduplicate by ID
+            const idMap = new Map(templates.map(item => [item.id, item]));
+
+            // Deduplicate by Name (some templates have different IDs but same name)
+            const uniqueTemplates: Template[] = [];
+            const seenNames = new Set<string>();
+
+            for (const template of idMap.values()) {
+                const normalizedName = template.name.trim().toLowerCase();
+                if (!seenNames.has(normalizedName)) {
+                    seenNames.add(normalizedName);
+                    uniqueTemplates.push(template);
+                }
+            }
+
+            return uniqueTemplates.sort((a, b) => a.name.localeCompare(b.name));
         } catch (e) {
             console.error("Memegen Error", e);
             return [];

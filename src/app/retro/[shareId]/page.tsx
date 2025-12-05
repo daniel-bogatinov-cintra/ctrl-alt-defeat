@@ -32,10 +32,14 @@ export default function RetroPage() {
     const [currentLaneId, setCurrentLaneId] = useState<string>('');
     const [showShareToast, setShowShareToast] = useState(false);
 
-    const myParticipant = retro && participantsMap[retro.id];
+    const storedParticipant = retro && participantsMap[retro.id];
+    // Re-find from server to get _count
+    const myParticipant = retro && storedParticipant
+        ? retro.participants?.find((p: Participant) => p.id === storedParticipant.id) || storedParticipant
+        : null;
 
     // Determine if we need to show join dialog
-    const showJoinDialog = !!retro && !myParticipant;
+    const showJoinDialog = !!retro && !storedParticipant;
 
     const handleJoin = async (name: string) => {
         if (!retro) return;
@@ -68,15 +72,17 @@ export default function RetroPage() {
     };
 
     const handleReact = async (memeId: string, emoji: string) => {
-        // Optimistic update?
-        // Need to update local cache deep in the tree. SWR handles this if we mutate.
-        // For simple hackathon, just fire and forget (polling will catch it 2s later).
-        // UI updates "optimistically" locally is complex with raw SWR data.
-        await fetch(`/api/memes/${memeId}/reactions`, {
+        if (!myParticipant) return;
+
+        const res = await fetch(`/api/memes/${memeId}/reactions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reaction: emoji })
+            body: JSON.stringify({ reaction: emoji, participantId: myParticipant.id })
         });
+
+        if (res.status === 403) {
+            alert("Vote limit reached! You can unvote other cards to regain votes.");
+        }
         mutate();
     };
 
@@ -140,6 +146,20 @@ export default function RetroPage() {
                             )}
                         </Box>
                     </Stack>
+
+                    {myParticipant && (() => {
+                        const used = myParticipant._count?.reactions || 0;
+                        const max = retro.maxVotesPerParticipant || 3;
+                        const left = Math.max(0, max - used);
+                        return (
+                            <Chip
+                                label={`${left} Votes Left`}
+                                color={left === 0 ? 'error' : 'secondary'}
+                                variant={left === 0 ? 'filled' : 'outlined'}
+                                sx={{ mr: 2, fontWeight: 'bold' }}
+                            />
+                        );
+                    })()}
 
                     <Button
                         startIcon={<ShareIcon />}

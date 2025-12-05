@@ -47,6 +47,8 @@ export default function MemeCard({ meme, onReact }: Props) {
                     </Box>
                 </Box>
 
+            </CardContent>
+            <Box sx={{ p: 1.5, pt: 0 }}>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
                     {REACTION_OPTIONS.map(emoji => (
                         <Box
@@ -73,7 +75,7 @@ export default function MemeCard({ meme, onReact }: Props) {
                         </Box>
                     ))}
                 </Stack>
-            </CardContent>
-        </Card>
+            </Box>
+        </Card >
     );
 }

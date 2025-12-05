@@ -28,7 +28,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { title, teamName } = body;
+        const { title, teamName, maxVotes } = body;
 
         if (!title) {
             return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
             data: {
                 title,
                 teamName,
+                maxVotesPerParticipant: maxVotes ? Number(maxVotes) : 3,
                 shareId,
                 lanes: {
                     create: [

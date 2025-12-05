@@ -8,27 +8,64 @@ export async function POST(
     try {
         const { id } = await params; // memeId
         const body = await request.json();
-        const { reaction } = body;
+        const { reaction, participantId } = body;
 
         if (!reaction) return NextResponse.json({ error: 'Reaction required' }, { status: 400 });
+        if (!participantId) return NextResponse.json({ error: 'Participant ID required' }, { status: 400 });
 
-        const meme = await prisma.memeEntry.findUnique({ where: { id } });
+        const meme = await prisma.memeEntry.findUnique({
+            where: { id },
+            include: { retro: true }
+        });
+
         if (!meme) {
             return NextResponse.json({ error: 'Meme not found' }, { status: 404 });
         }
 
-        const reactions = JSON.parse(meme.reactions || '{}');
-        // Simple toggle logic? Or just increment? 
-        // Prompt says "add or toggle". 
-        // If I don't track *who* reacted, I can only increment. 
-        // "quick one-click reactions ... implement a small API ... to add or toggle"
-        // Without user ID tracking, toggle is impossible. I'll just increment.
+        // Check if already reacted
+        const existing = await prisma.reaction.findUnique({
+            where: {
+                memeId_participantId_emoji: {
+                    memeId: id,
+                    participantId,
+                    emoji: reaction
+                }
+            }
+        });
 
-        reactions[reaction] = (reactions[reaction] || 0) + 1;
+        const reactionsMap = JSON.parse(meme.reactions || '{}');
+
+        if (existing) {
+            // Remove (Toggle Off)
+            await prisma.reaction.delete({ where: { id: existing.id } });
+            reactionsMap[reaction] = Math.max(0, (reactionsMap[reaction] || 0) - 1);
+        } else {
+            // Check Limit
+            const totalVotes = await prisma.reaction.count({
+                where: {
+                    participantId,
+                    meme: { retroId: meme.retroId }
+                }
+            });
+
+            if (totalVotes >= meme.retro.maxVotesPerParticipant) {
+                return NextResponse.json({ error: `Vote limit of ${meme.retro.maxVotesPerParticipant} reached` }, { status: 403 });
+            }
+
+            // Create
+            await prisma.reaction.create({
+                data: {
+                    memeId: id,
+                    participantId,
+                    emoji: reaction
+                }
+            });
+            reactionsMap[reaction] = (reactionsMap[reaction] || 0) + 1;
+        }
 
         const updated = await prisma.memeEntry.update({
             where: { id },
-            data: { reactions: JSON.stringify(reactions) }
+            data: { reactions: JSON.stringify(reactionsMap) }
         });
 
         return NextResponse.json(updated);

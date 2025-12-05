@@ -19,7 +19,13 @@ export async function GET(
                 lanes: {
                     orderBy: { order: 'asc' }
                 },
-                participants: true,
+                participants: {
+                    include: {
+                        _count: {
+                            select: { reactions: true }
+                        }
+                    }
+                },
                 memes: {
                     include: {
                         participant: true
