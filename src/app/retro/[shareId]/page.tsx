@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { useState, useMemo, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -8,7 +8,7 @@ import {
     Box, Typography, Button, IconButton, Chip, Stack, Fab,
     Container, AppBar, Toolbar, Avatar, Tooltip, Snackbar,
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-    InputBase, TextField
+    InputBase, TextField, Slider
 } from '@mui/material';
 import ShareIcon from '@mui/icons-material/Share';
 import AddIcon from '@mui/icons-material/Add';
@@ -27,6 +27,7 @@ const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function RetroPage() {
     const params = useParams();
+    const router = useRouter();
     const shareId = params?.shareId as string;
 
     const { data: retro, mutate, error } = useSWR(shareId ? `/api/retros/${shareId}` : null, fetcher, { refreshInterval: 2000 });
@@ -45,6 +46,8 @@ export default function RetroPage() {
     const [showShareToast, setShowShareToast] = useState(false);
     const [customLaneTitles, setCustomLaneTitles] = useState<Record<string, string>>({});
     const [viewingMeme, setViewingMeme] = useState<MemeEntry | null>(null);
+    const [endRetroDialogOpen, setEndRetroDialogOpen] = useState(false);
+    const [outrageScore, setOutrageScore] = useState(1);
 
     const storedParticipant = retro && participantsMap[retro.id];
     // Re-find from server to get _count
@@ -296,9 +299,18 @@ export default function RetroPage() {
                         variant="outlined"
                         size="small"
                         onClick={handleExportPDF}
-                        sx={{ borderRadius: 6 }}
+                        sx={{ borderRadius: 6, mr: 1 }}
                     >
                         Export PDF
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        onClick={() => setEndRetroDialogOpen(true)}
+                        sx={{ borderRadius: 6 }}
+                    >
+                        End Retro
                     </Button>
                 </Toolbar>
             </AppBar>
@@ -748,6 +760,125 @@ export default function RetroPage() {
                         </DialogActions>
                     </>
                 )}
+            </Dialog>
+
+            <Dialog
+                open={endRetroDialogOpen}
+                onClose={() => setEndRetroDialogOpen(false)}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                        backgroundImage: 'none',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        overflow: 'hidden'
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    color: 'error.main',
+                    fontWeight: 800,
+                    pb: 1,
+                    fontSize: '1.75rem',
+                    textAlign: 'center'
+                }}>
+                    🔥 The Outrageometer 🔥
+                </DialogTitle>
+                <DialogContent sx={{ pt: 3 }}>
+                    <DialogContentText color="text.secondary" sx={{ mb: 3, textAlign: 'center', fontSize: '1rem' }}>
+                        Rate your retro experience on the Fire Level Scale
+                    </DialogContentText>
+
+                    <Box sx={{ px: 2 }}>
+                        <Slider
+                            value={outrageScore}
+                            onChange={(_, value) => setOutrageScore(value as number)}
+                            min={1}
+                            max={3}
+                            step={1}
+                            marks={[
+                                { value: 1, label: '😌' },
+                                { value: 2, label: '😐' },
+                                { value: 3, label: '😡' }
+                            ]}
+                            sx={{
+                                '& .MuiSlider-thumb': {
+                                    width: 24,
+                                    height: 24,
+                                    bgcolor: 'error.main',
+                                    '&:hover': {
+                                        boxShadow: '0 0 0 8px rgba(244, 67, 54, 0.16)'
+                                    }
+                                },
+                                '& .MuiSlider-track': {
+                                    bgcolor: 'error.main',
+                                    border: 'none'
+                                },
+                                '& .MuiSlider-rail': {
+                                    bgcolor: 'rgba(255,255,255,0.1)'
+                                },
+                                '& .MuiSlider-mark': {
+                                    bgcolor: 'error.main',
+                                    width: 3,
+                                    height: 3
+                                },
+                                '& .MuiSlider-markLabel': {
+                                    fontSize: '1.5rem',
+                                    top: 35
+                                }
+                            }}
+                        />
+                    </Box>
+
+                    <Box sx={{
+                        mt: 5,
+                        p: 3,
+                        bgcolor: 'rgba(244, 67, 54, 0.1)',
+                        borderRadius: 2,
+                        border: '1px solid rgba(244, 67, 54, 0.3)'
+                    }}>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: 'error.main' }}>
+                            {outrageScore === 1 && 'Low: Mildly Annoyed'}
+                            {outrageScore === 2 && 'Mid: Spicy Frustrated'}
+                            {outrageScore === 3 && 'High: Full Blazing Outrage'}
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                            {outrageScore === 1 && '"Yeah it was dumb, but I\'ll live."'}
+                            {outrageScore === 2 && '"I have feedback. And none of it is polite."'}
+                            {outrageScore === 3 && '"This retro is now evidence for a future court case."'}
+                        </Typography>
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 2 }}>
+                    <Button
+                        onClick={() => setEndRetroDialogOpen(false)}
+                        color="inherit"
+                        sx={{ fontWeight: 'bold' }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={async () => {
+                            console.log('Retro ended with outrage score:', outrageScore);
+                            setEndRetroDialogOpen(false);
+
+                            // Export PDF
+                            await handleExportPDF();
+
+                            // Small delay to ensure PDF download starts
+                            setTimeout(() => {
+                                router.push('/');
+                            }, 500);
+                        }}
+                        variant="contained"
+                        color="error"
+                        sx={{ borderRadius: 2, fontWeight: 'bold', px: 3 }}
+                    >
+                        End Retro
+                    </Button>
+                </DialogActions>
             </Dialog>
         </Box >
     );
