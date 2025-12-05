@@ -92,7 +92,7 @@ export default function MemeCreator({ open, onClose, onSubmit, lanes, defaultLan
             }}
         >
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h5" fontWeight="bold">Create a Meme</Typography>
+                <Typography variant="h5" component="span" fontWeight="bold">Create a Meme</Typography>
                 <IconButton onClick={onClose}><CloseIcon /></IconButton>
             </DialogTitle>
 

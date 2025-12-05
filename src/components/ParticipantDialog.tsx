@@ -25,7 +25,7 @@ export default function ParticipantDialog({ open, onSubmit }: Props) {
             }}
         >
             <DialogTitle sx={{ textAlign: 'center', pb: 0 }}>
-                <Typography variant="h5" fontWeight="bold">Who are you?</Typography>
+                <Typography variant="h5" component="span" fontWeight="bold">Who are you?</Typography>
             </DialogTitle>
             <DialogContent sx={{ pt: 3 }}>
                 <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
