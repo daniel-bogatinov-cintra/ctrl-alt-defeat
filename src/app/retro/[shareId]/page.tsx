@@ -668,110 +668,149 @@ export default function RetroPage() {
                     }
                 }}
             >
-                {viewingMeme && (
-                    <>
-                        <DialogContent sx={{
-                            p: 3,
-                            position: 'relative',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            minHeight: 400,
-                            '&::-webkit-scrollbar': {
-                                width: '8px',
-                            },
-                            '&::-webkit-scrollbar-track': {
-                                background: 'rgba(255,255,255,0.05)',
-                                borderRadius: '4px',
-                            },
-                            '&::-webkit-scrollbar-thumb': {
-                                background: 'rgba(139, 92, 246, 0.3)',
-                                borderRadius: '4px',
-                                '&:hover': {
-                                    background: 'rgba(139, 92, 246, 0.5)',
+                {viewingMeme && (() => {
+                    // Get the live meme data from retro to ensure reactions are up-to-date
+                    const liveMeme = retro?.memes?.find((m: MemeEntry) => m.id === viewingMeme.id) || viewingMeme;
+
+                    return (
+                        <>
+                            <DialogContent sx={{
+                                p: 3,
+                                position: 'relative',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                minHeight: 400,
+                                '&::-webkit-scrollbar': {
+                                    width: '8px',
+                                },
+                                '&::-webkit-scrollbar-track': {
+                                    background: 'rgba(255,255,255,0.05)',
+                                    borderRadius: '4px',
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                    background: 'rgba(139, 92, 246, 0.3)',
+                                    borderRadius: '4px',
+                                    '&:hover': {
+                                        background: 'rgba(139, 92, 246, 0.5)',
+                                    }
                                 }
-                            }
-                        }}>
-                            {viewingMeme.generatedImageUrl ? (
-                                <Box
-                                    component="img"
-                                    src={viewingMeme.generatedImageUrl}
-                                    alt="Meme"
-                                    sx={{
-                                        width: '100%',
-                                        height: 'auto',
-                                        maxHeight: '75vh',
-                                        maxWidth: '100%',
-                                        objectFit: 'contain',
-                                        bgcolor: '#000',
-                                        borderRadius: 2
-                                    }}
-                                />
-                            ) : (
-                                <Box sx={{
-                                    width: '100%',
-                                    minHeight: 400,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    p: 6,
-                                    bgcolor: '#fef3c7',
-                                    color: '#4b5563',
-                                    borderRadius: 2
-                                }}>
-                                    <Typography
-                                        variant="h3"
+                            }}>
+                                {liveMeme.generatedImageUrl ? (
+                                    <Box
+                                        component="img"
+                                        src={liveMeme.generatedImageUrl}
+                                        alt="Meme"
                                         sx={{
-                                            fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif',
-                                            lineHeight: 1.4,
-                                            wordBreak: 'break-word',
-                                            fontStyle: 'italic',
-                                            textAlign: 'center',
-                                            maxWidth: '90%'
+                                            width: '100%',
+                                            height: 'auto',
+                                            maxHeight: '75vh',
+                                            maxWidth: '100%',
+                                            objectFit: 'contain',
+                                            bgcolor: '#000',
+                                            borderRadius: 2
                                         }}
-                                    >
-                                        "{viewingMeme.textContent}"
-                                    </Typography>
-                                </Box>
-                            )}
-                        </DialogContent>
-                        <DialogActions sx={{ p: 3, pt: 2, bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', flexDirection: 'column', alignItems: 'stretch' }}>
-                            {viewingMeme.description && (
-                                <Box sx={{ mb: 2, p: 2, bgcolor: 'rgba(139, 92, 246, 0.1)', borderRadius: 2, border: '1px solid rgba(139, 92, 246, 0.3)' }}>
-                                    <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 'bold', textTransform: 'uppercase', mb: 0.5, display: 'block' }}>
-                                        Description
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                        {viewingMeme.description}
-                                    </Typography>
-                                </Box>
-                            )}
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    />
+                                ) : (
                                     <Box sx={{
-                                        width: 36, height: 36, borderRadius: '50%',
-                                        bgcolor: viewingMeme.participant?.avatarColor || '#777',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '1rem', fontWeight: 'bold'
+                                        width: '100%',
+                                        minHeight: 400,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        p: 6,
+                                        bgcolor: '#fef3c7',
+                                        color: '#4b5563',
+                                        borderRadius: 2
                                     }}>
-                                        {viewingMeme.participant?.displayName?.[0] || '?'}
+                                        <Typography
+                                            variant="h3"
+                                            sx={{
+                                                fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif',
+                                                lineHeight: 1.4,
+                                                wordBreak: 'break-word',
+                                                fontStyle: 'italic',
+                                                textAlign: 'center',
+                                                maxWidth: '90%'
+                                            }}
+                                        >
+                                            "{liveMeme.textContent}"
+                                        </Typography>
                                     </Box>
-                                    <Typography variant="body1" fontWeight="600">
-                                        {viewingMeme.participant?.displayName}
-                                    </Typography>
+                                )}
+                            </DialogContent>
+                            <DialogActions sx={{ p: 3, pt: 2, bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', flexDirection: 'column', alignItems: 'stretch' }}>
+                                {liveMeme.description && (
+                                    <Box sx={{ mb: 2, p: 2, bgcolor: 'rgba(139, 92, 246, 0.1)', borderRadius: 2, border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                                        <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 'bold', textTransform: 'uppercase', mb: 0.5, display: 'block' }}>
+                                            Description
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                            {liveMeme.description}
+                                        </Typography>
+                                    </Box>
+                                )}
+                                <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                    {['👀', '😡', '😕'].map(emoji => {
+                                        const reactions = JSON.parse(liveMeme.reactions || '{}');
+                                        const count = reactions[emoji] || 0;
+                                        return (
+                                            <Box
+                                                key={emoji}
+                                                onClick={() => handleReact(liveMeme.id, emoji)}
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 0.5,
+                                                    px: 1.5,
+                                                    py: 0.75,
+                                                    borderRadius: 2,
+                                                    bgcolor: count > 0 ? 'rgba(139, 92, 246, 0.2)' : 'rgba(255,255,255,0.05)',
+                                                    border: '1px solid',
+                                                    borderColor: count > 0 ? 'primary.main' : 'rgba(255,255,255,0.1)',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(139, 92, 246, 0.3)',
+                                                        transform: 'scale(1.05)'
+                                                    }
+                                                }}
+                                            >
+                                                <Typography sx={{ fontSize: '1.25rem' }}>{emoji}</Typography>
+                                                <Typography variant="caption" fontWeight="bold" color={count > 0 ? 'primary.main' : 'text.secondary'}>
+                                                    {count}
+                                                </Typography>
+                                            </Box>
+                                        );
+                                    })}
                                 </Box>
-                                <Button
-                                    onClick={() => setViewingMeme(null)}
-                                    variant="contained"
-                                    size="large"
-                                    sx={{ borderRadius: 2, px: 4, fontWeight: 'bold' }}
-                                >
-                                    Close
-                                </Button>
-                            </Box>
-                        </DialogActions>
-                    </>
-                )}
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                        <Box sx={{
+                                            width: 36, height: 36, borderRadius: '50%',
+                                            bgcolor: viewingMeme.participant?.avatarColor || '#777',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: '1rem', fontWeight: 'bold'
+                                        }}>
+                                            {viewingMeme.participant?.displayName?.[0] || '?'}
+                                        </Box>
+                                        <Typography variant="body1" fontWeight="600">
+                                            {viewingMeme.participant?.displayName}
+                                        </Typography>
+                                    </Box>
+                                    <Button
+                                        onClick={() => setViewingMeme(null)}
+                                        variant="contained"
+                                        size="large"
+                                        sx={{ borderRadius: 2, px: 4, fontWeight: 'bold' }}
+                                    >
+                                        Close
+                                    </Button>
+                                </Box>
+                            </DialogActions>
+                        </>
+                    );
+                })()}
             </Dialog>
 
             <Dialog

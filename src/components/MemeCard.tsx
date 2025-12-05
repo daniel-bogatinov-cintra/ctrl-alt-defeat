@@ -11,7 +11,7 @@ interface Props {
     onClick?: () => void;
 }
 
-const REACTION_OPTIONS = ['🔥', '😂', '💀', '✅'];
+const REACTION_OPTIONS = ['👀', '😡', '😕'];
 
 export default function MemeCard({ meme, onReact, onDelete, onClick }: Props) {
     let reactions: Record<string, number> = {};
