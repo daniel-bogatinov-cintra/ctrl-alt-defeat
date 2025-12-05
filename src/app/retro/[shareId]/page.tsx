@@ -226,12 +226,9 @@ export default function RetroPage() {
         return lanes;
     }, [retro]);
 
-    if (error) return <Box p={4}><Typography color="error">Failed to load retro.</Typography></Box>;
-    if (!retro) return <Box p={4} textAlign="center"><Typography>Loading the vibes...</Typography></Box>;
-
-    // Sort memes by total votes for focus mode
+    // Sort memes by total votes for focus mode (must be before conditional returns)
     const sortedMemesByVotes = useMemo(() => {
-        if (!retro.memes) return [];
+        if (!retro?.memes) return [];
         return [...retro.memes].sort((a, b) => {
             const aReactions = JSON.parse(a.reactions || '{}');
             const bReactions = JSON.parse(b.reactions || '{}');
@@ -239,7 +236,10 @@ export default function RetroPage() {
             const bTotal = Object.values(bReactions).reduce((sum: number, count) => sum + (count as number), 0);
             return bTotal - aTotal; // Descending order
         });
-    }, [retro.memes]);
+    }, [retro?.memes]);
+
+    if (error) return <Box p={4}><Typography color="error">Failed to load retro.</Typography></Box>;
+    if (!retro) return <Box p={4} textAlign="center"><Typography>Loading the vibes...</Typography></Box>;
 
     return (
         <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
