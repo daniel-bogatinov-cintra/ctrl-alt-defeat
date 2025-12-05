@@ -1,16 +1,18 @@
 'use client';
-import { Card, CardMedia, CardContent, Typography, Box, Stack } from '@mui/material';
+import { Card, CardMedia, CardContent, Typography, Box, Stack, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { MemeEntry } from '@/types';
 import { motion } from 'framer-motion';
 
 interface Props {
     meme: MemeEntry;
     onReact: (emoji: string) => void;
+    onDelete: () => void;
 }
 
 const REACTION_OPTIONS = ['🔥', '😂', '💀', '✅'];
 
-export default function MemeCard({ meme, onReact }: Props) {
+export default function MemeCard({ meme, onReact, onDelete }: Props) {
     let reactions: Record<string, number> = {};
     try {
         reactions = JSON.parse(meme.reactions);
@@ -22,8 +24,29 @@ export default function MemeCard({ meme, onReact }: Props) {
             layout
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            sx={{ overflow: 'hidden', position: 'relative' }}
+            sx={{ overflow: 'hidden', position: 'relative', '&:hover .delete-btn': { opacity: 1 } }}
         >
+            <IconButton
+                className="delete-btn"
+                size="small"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                }}
+                sx={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 4,
+                    zIndex: 10,
+                    bgcolor: 'rgba(0,0,0,0.5)',
+                    color: 'white',
+                    opacity: 0,
+                    transition: 'opacity 0.2s',
+                    '&:hover': { bgcolor: 'red' }
+                }}
+            >
+                <DeleteIcon fontSize="small" />
+            </IconButton>
             {meme.generatedImageUrl ? (
                 <CardMedia
                     component="img"

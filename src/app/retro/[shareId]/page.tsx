@@ -35,6 +35,8 @@ export default function RetroPage() {
     const [actionDialogOpen, setActionDialogOpen] = useState(false);
     const [actionText, setActionText] = useState('');
     const [voteLimitDialogOpen, setVoteLimitDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [memeToDelete, setMemeToDelete] = useState<string | null>(null);
     const [timerFinishedDialogOpen, setTimerFinishedDialogOpen] = useState(false);
     const [currentLaneId, setCurrentLaneId] = useState<string>('');
     const [showShareToast, setShowShareToast] = useState(false);
@@ -91,6 +93,21 @@ export default function RetroPage() {
         if (res.status === 403) {
             setVoteLimitDialogOpen(true);
         }
+        mutate();
+    };
+
+
+
+    const handleDelete = (memeId: string) => {
+        setMemeToDelete(memeId);
+        setDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!myParticipant || !memeToDelete) return;
+        await fetch(`/api/memes/${memeToDelete}`, { method: 'DELETE' });
+        setDeleteDialogOpen(false);
+        setMemeToDelete(null);
         mutate();
     };
 
@@ -239,6 +256,7 @@ export default function RetroPage() {
                                         key={meme.id}
                                         meme={meme}
                                         onReact={(emoji) => handleReact(meme.id, emoji)}
+                                        onDelete={() => handleDelete(meme.id)}
                                     />
                                 ))}
 
@@ -465,6 +483,53 @@ export default function RetroPage() {
                         sx={{ borderRadius: 2, fontWeight: 'bold' }}
                     >
                         Create Action
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={() => setDeleteDialogOpen(false)}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                        backgroundImage: 'none',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        maxWidth: 400
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    color: 'error.main',
+                    fontWeight: 800,
+                    pb: 1,
+                    fontSize: '1.5rem'
+                }}>
+                    Delete this?
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText color="text.secondary" sx={{ fontSize: '1rem', lineHeight: 1.6 }}>
+                        Are you sure you want to delete this card? <br />
+                        This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 1 }}>
+                    <Button
+                        onClick={() => setDeleteDialogOpen(false)}
+                        color="inherit"
+                        sx={{ fontWeight: 'bold' }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={confirmDelete}
+                        variant="contained"
+                        color="error"
+                        autoFocus
+                        sx={{ borderRadius: 2, fontWeight: 'bold' }}
+                    >
+                        Delete
                     </Button>
                 </DialogActions>
             </Dialog>
