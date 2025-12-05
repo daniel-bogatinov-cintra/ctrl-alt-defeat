@@ -13,12 +13,15 @@ import {
 import ShareIcon from '@mui/icons-material/Share';
 import AddIcon from '@mui/icons-material/Add';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DownloadIcon from '@mui/icons-material/Download';
 import { Lane, MemeEntry, Participant } from '@/types';
 import MemeCard from '@/components/MemeCard';
 import MemeCreator from '@/components/MemeCreator';
 import ParticipantDialog from '@/components/ParticipantDialog';
 import RetroTimer from '@/components/RetroTimer';
 import { motion } from 'framer-motion';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -117,6 +120,78 @@ export default function RetroPage() {
         setShowShareToast(true);
     };
 
+    const handleExportPDF = async () => {
+        if (!retro) return;
+
+        try {
+            // Get the main board element
+            const boardElement = document.querySelector('[data-board-container]') as HTMLElement;
+            if (!boardElement) return;
+
+            // Store original scroll position and overflow
+            const originalScrollLeft = boardElement.scrollLeft;
+            const originalOverflow = boardElement.style.overflow;
+
+            // Temporarily remove overflow to capture full content
+            boardElement.style.overflow = 'visible';
+            boardElement.scrollLeft = 0;
+
+            // Create canvas from the board with full width
+            const canvas = await html2canvas(boardElement, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#0f172a',
+                width: boardElement.scrollWidth,
+                height: boardElement.scrollHeight,
+                windowWidth: boardElement.scrollWidth,
+                windowHeight: boardElement.scrollHeight
+            });
+
+            // Restore original state
+            boardElement.style.overflow = originalOverflow;
+            boardElement.scrollLeft = originalScrollLeft;
+
+            // Calculate PDF dimensions to fit content
+            const imgWidth = 297; // A4 width in mm
+            const pageHeight = 210; // A4 height in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // Create PDF with appropriate orientation
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // If content is taller than one page, add multiple pages
+            if (imgHeight > pageHeight) {
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                while (heightLeft > 0) {
+                    const imgData = canvas.toDataURL('image/png');
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                    position -= pageHeight;
+
+                    if (heightLeft > 0) {
+                        pdf.addPage();
+                    }
+                }
+            } else {
+                const imgData = canvas.toDataURL('image/png');
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            }
+
+            // Download with retro title
+            const fileName = `${retro.title.replace(/[^a-z0-9]/gi, '_')}_retro.pdf`;
+            pdf.save(fileName);
+        } catch (error) {
+            console.error('Error exporting PDF:', error);
+        }
+    };
+
     const handleTimer = async (action: 'start' | 'stop', duration?: number) => {
         if (!retro) return;
         await fetch(`/api/retros/${retro.shareId}/timer`, {
@@ -212,15 +287,24 @@ export default function RetroPage() {
                         variant="outlined"
                         size="small"
                         onClick={handleShare}
-                        sx={{ borderRadius: 6 }}
+                        sx={{ borderRadius: 6, mr: 1 }}
                     >
                         Share
+                    </Button>
+                    <Button
+                        startIcon={<DownloadIcon />}
+                        variant="outlined"
+                        size="small"
+                        onClick={handleExportPDF}
+                        sx={{ borderRadius: 6 }}
+                    >
+                        Export PDF
                     </Button>
                 </Toolbar>
             </AppBar>
 
             {/* Board */}
-            <Box sx={{ flexGrow: 1, overflowX: 'auto', overflowY: 'hidden', p: 3 }}>
+            <Box data-board-container sx={{ flexGrow: 1, overflowX: 'auto', overflowY: 'hidden', p: 3 }}>
                 <Stack direction="row" spacing={3} sx={{ height: '100%', minWidth: 'min-content' }}>
                     {retro.lanes?.map((lane: Lane) => (
                         <Box
