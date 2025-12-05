@@ -560,20 +560,42 @@ export default function RetroPage() {
             <Dialog
                 open={!!viewingMeme}
                 onClose={() => setViewingMeme(null)}
-                maxWidth="md"
+                maxWidth="lg"
                 fullWidth
                 PaperProps={{
                     sx: {
                         borderRadius: 3,
                         bgcolor: 'background.paper',
                         backgroundImage: 'none',
-                        border: '1px solid rgba(255,255,255,0.1)'
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        m: 2
                     }
                 }}
             >
                 {viewingMeme && (
                     <>
-                        <DialogContent sx={{ p: 0, position: 'relative' }}>
+                        <DialogContent sx={{
+                            p: 3,
+                            position: 'relative',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            minHeight: 400,
+                            '&::-webkit-scrollbar': {
+                                width: '8px',
+                            },
+                            '&::-webkit-scrollbar-track': {
+                                background: 'rgba(255,255,255,0.05)',
+                                borderRadius: '4px',
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                                background: 'rgba(139, 92, 246, 0.3)',
+                                borderRadius: '4px',
+                                '&:hover': {
+                                    background: 'rgba(139, 92, 246, 0.5)',
+                                }
+                            }
+                        }}>
                             {viewingMeme.generatedImageUrl ? (
                                 <Box
                                     component="img"
@@ -582,29 +604,34 @@ export default function RetroPage() {
                                     sx={{
                                         width: '100%',
                                         height: 'auto',
-                                        maxHeight: '70vh',
+                                        maxHeight: '75vh',
+                                        maxWidth: '100%',
                                         objectFit: 'contain',
-                                        bgcolor: '#000'
+                                        bgcolor: '#000',
+                                        borderRadius: 2
                                     }}
                                 />
                             ) : (
                                 <Box sx={{
+                                    width: '100%',
                                     minHeight: 400,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     p: 6,
                                     bgcolor: '#fef3c7',
-                                    color: '#4b5563'
+                                    color: '#4b5563',
+                                    borderRadius: 2
                                 }}>
                                     <Typography
-                                        variant="h4"
+                                        variant="h3"
                                         sx={{
                                             fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif',
                                             lineHeight: 1.4,
                                             wordBreak: 'break-word',
                                             fontStyle: 'italic',
-                                            textAlign: 'center'
+                                            textAlign: 'center',
+                                            maxWidth: '90%'
                                         }}
                                     >
                                         "{viewingMeme.textContent}"
@@ -612,21 +639,26 @@ export default function RetroPage() {
                                 </Box>
                             )}
                         </DialogContent>
-                        <DialogActions sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.02)' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 'auto' }}>
+                        <DialogActions sx={{ p: 3, pt: 2, bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mr: 'auto' }}>
                                 <Box sx={{
-                                    width: 32, height: 32, borderRadius: '50%',
+                                    width: 36, height: 36, borderRadius: '50%',
                                     bgcolor: viewingMeme.participant?.avatarColor || '#777',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '0.9rem', fontWeight: 'bold'
+                                    fontSize: '1rem', fontWeight: 'bold'
                                 }}>
                                     {viewingMeme.participant?.displayName?.[0] || '?'}
                                 </Box>
-                                <Typography variant="body2" fontWeight="600">
+                                <Typography variant="body1" fontWeight="600">
                                     {viewingMeme.participant?.displayName}
                                 </Typography>
                             </Box>
-                            <Button onClick={() => setViewingMeme(null)} variant="contained" sx={{ borderRadius: 2 }}>
+                            <Button
+                                onClick={() => setViewingMeme(null)}
+                                variant="contained"
+                                size="large"
+                                sx={{ borderRadius: 2, px: 4, fontWeight: 'bold' }}
+                            >
                                 Close
                             </Button>
                         </DialogActions>
