@@ -2,6 +2,7 @@ export interface Lane {
     id: string;
     title: string;
     order: number;
+    type?: string; // "meme" | "action"
 }
 export interface Participant {
     id: string;
@@ -24,9 +25,10 @@ export interface Retro {
 
 export interface MemeEntry {
     id: string;
-    topText: string;
-    bottomText: string;
-    generatedImageUrl: string;
+    topText?: string;
+    bottomText?: string;
+    generatedImageUrl?: string;
+    textContent?: string;
     participantId: string;
     participant?: Participant;
     laneId: string;

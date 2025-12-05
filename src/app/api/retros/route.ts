@@ -45,10 +45,11 @@ export async function POST(request: Request) {
                 shareId,
                 lanes: {
                     create: [
-                        { title: 'What went well', order: 0 },
-                        { title: 'What didn\'t go well', order: 1 },
-                        { title: 'Ideas / Experiments', order: 2 },
-                        { title: 'Kudos / Shoutouts', order: 3 },
+                        { title: 'Not Completely On Fire', order: 0 },
+                        { title: 'Here Lies Our Sanity', order: 1 },
+                        { title: 'Solutions We’ll Ignore Later', order: 2 },
+                        { title: 'You Did a Thing', order: 3 },
+                        { title: 'Stuff We Pinky Swore On', order: 4, type: 'action' },
                     ]
                 }
             }

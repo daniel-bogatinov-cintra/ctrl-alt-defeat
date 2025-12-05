@@ -28,6 +28,7 @@ model Lane {
   retro   Retro  @relation(fields: [retroId], references: [id], onDelete: Cascade)
   title   String
   order   Int
+  type    String      @default("meme") // "meme" or "action"
   memes   MemeEntry[]
 }
 
@@ -59,10 +60,11 @@ model MemeEntry {
   participant       Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   laneId            String?
   lane              Lane?    @relation(fields: [laneId], references: [id])
-  templateId        String
+  templateId        String?
   topText           String?
   bottomText        String?
-  generatedImageUrl String
+  textContent       String?  // For action items
+  generatedImageUrl String?
   createdAt         DateTime @default(now())
   
   // JSON string for quick counts (legacy/optimistic)

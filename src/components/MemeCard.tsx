@@ -24,12 +24,37 @@ export default function MemeCard({ meme, onReact }: Props) {
             animate={{ opacity: 1, scale: 1 }}
             sx={{ overflow: 'hidden', position: 'relative' }}
         >
-            <CardMedia
-                component="img"
-                image={meme.generatedImageUrl}
-                alt="Meme"
-                sx={{ bgcolor: '#000', minHeight: 200, objectFit: 'contain' }}
-            />
+            {meme.generatedImageUrl ? (
+                <CardMedia
+                    component="img"
+                    image={meme.generatedImageUrl}
+                    alt="Meme"
+                    sx={{ bgcolor: '#000', minHeight: 200, objectFit: 'contain' }}
+                />
+            ) : (
+                <Box sx={{
+                    minHeight: 200,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    p: 3,
+                    bgcolor: '#fef3c7', // Amber-100 (Sticky note yellow)
+                    color: '#4b5563', // Gray-600
+                    textAlign: 'center'
+                }}>
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif',
+                            lineHeight: 1.4,
+                            wordBreak: 'break-word',
+                            fontStyle: 'italic'
+                        }}
+                    >
+                        "{meme.textContent}"
+                    </Typography>
+                </Box>
+            )}
             <CardContent sx={{ p: '12px !important' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

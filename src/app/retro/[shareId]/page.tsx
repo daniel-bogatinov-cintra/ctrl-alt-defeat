@@ -7,7 +7,8 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import {
     Box, Typography, Button, IconButton, Chip, Stack, Fab,
     Container, AppBar, Toolbar, Avatar, Tooltip, Snackbar,
-    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+    InputBase, TextField
 } from '@mui/material';
 import ShareIcon from '@mui/icons-material/Share';
 import AddIcon from '@mui/icons-material/Add';
@@ -31,10 +32,13 @@ export default function RetroPage() {
     const [participantsMap, setParticipantsMap] = useLocalStorage<Record<string, Participant>>('meme_retro_participants', {});
 
     const [creatorOpen, setCreatorOpen] = useState(false);
+    const [actionDialogOpen, setActionDialogOpen] = useState(false);
+    const [actionText, setActionText] = useState('');
     const [voteLimitDialogOpen, setVoteLimitDialogOpen] = useState(false);
     const [timerFinishedDialogOpen, setTimerFinishedDialogOpen] = useState(false);
     const [currentLaneId, setCurrentLaneId] = useState<string>('');
     const [showShareToast, setShowShareToast] = useState(false);
+    const [customLaneTitles, setCustomLaneTitles] = useState<Record<string, string>>({});
 
     const storedParticipant = retro && participantsMap[retro.id];
     // Re-find from server to get _count
@@ -61,7 +65,7 @@ export default function RetroPage() {
         }
     };
 
-    const handleCreateMeme = async (data: { templateId: string, lines: string[], laneId: string }) => {
+    const handleCreateMeme = async (data: { templateId: string, lines: string[], laneId: string, textContent?: string }) => {
         if (!retro || !myParticipant) return;
 
         await fetch(`/api/retros/${retro.shareId}/memes`, {
@@ -213,10 +217,19 @@ export default function RetroPage() {
                                 p: 2
                             }}
                         >
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    {lane.title}
-                                </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
+                                <InputBase
+                                    value={customLaneTitles[lane.id] ?? lane.title}
+                                    onChange={(e) => setCustomLaneTitles(prev => ({ ...prev, [lane.id]: e.target.value }))}
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
+                                        flexGrow: 1,
+                                        mr: 1,
+                                        color: 'text.primary'
+                                    }}
+                                />
                                 <Chip label={filteredMemes[lane.id]?.length || 0} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
                             </Box>
 
@@ -228,17 +241,40 @@ export default function RetroPage() {
                                         onReact={(emoji) => handleReact(meme.id, emoji)}
                                     />
                                 ))}
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<AddIcon />}
-                                    sx={{ borderStyle: 'dashed', opacity: 0.6, '&:hover': { opacity: 1 } }}
-                                    onClick={() => {
-                                        setCurrentLaneId(lane.id);
-                                        setCreatorOpen(true);
-                                    }}
-                                >
-                                    Add Meme
-                                </Button>
+
+                                {lane.type === 'action' ? (
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<AddIcon />}
+                                        sx={{
+                                            borderStyle: 'dashed',
+                                            opacity: 0.8,
+                                            '&:hover': { opacity: 1 },
+                                            borderColor: 'warning.main',
+                                            color: 'warning.main',
+                                            justifyContent: 'flex-start',
+                                            pl: 2
+                                        }}
+                                        onClick={() => {
+                                            setCurrentLaneId(lane.id);
+                                            setActionDialogOpen(true);
+                                        }}
+                                    >
+                                        Add Action
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<AddIcon />}
+                                        sx={{ borderStyle: 'dashed', opacity: 0.6, '&:hover': { opacity: 1 }, justifyContent: 'flex-start', pl: 2 }}
+                                        onClick={() => {
+                                            setCurrentLaneId(lane.id);
+                                            setCreatorOpen(true);
+                                        }}
+                                    >
+                                        Add Meme
+                                    </Button>
+                                )}
                             </Stack>
                         </Box>
                     ))}
@@ -361,6 +397,77 @@ export default function RetroPage() {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Box>
+
+            <Dialog
+                open={actionDialogOpen}
+                onClose={() => setActionDialogOpen(false)}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                        backgroundImage: 'none',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        maxWidth: 500,
+                        width: '100%'
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    color: 'warning.main',
+                    fontWeight: 800,
+                    pb: 1,
+                    fontSize: '1.5rem'
+                }}>
+                    New Action Item
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText color="text.secondary" sx={{ mb: 2 }}>
+                        What are we committing to?
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="action-item"
+                        label="Action Description"
+                        type="text"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        variant="outlined"
+                        value={actionText}
+                        onChange={(e) => setActionText(e.target.value)}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                            }
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 1 }}>
+                    <Button onClick={() => setActionDialogOpen(false)} color="inherit">
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            if (actionText.trim()) {
+                                handleCreateMeme({
+                                    templateId: '',
+                                    lines: [],
+                                    laneId: currentLaneId,
+                                    textContent: actionText
+                                });
+                                setActionText('');
+                                setActionDialogOpen(false);
+                            }
+                        }}
+                        variant="contained"
+                        color="warning"
+                        sx={{ borderRadius: 2, fontWeight: 'bold' }}
+                    >
+                        Create Action
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Box >
     );
 }

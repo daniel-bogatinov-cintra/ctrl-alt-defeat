@@ -9,10 +9,10 @@ export async function POST(
     try {
         const { id } = await params;
         const body = await request.json();
-        const { templateId, lines, participantId, laneId } = body;
+        const { templateId, lines, participantId, laneId, textContent } = body;
 
-        if (!templateId || !participantId) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        if (!participantId || (!templateId && !textContent)) {
+            return NextResponse.json({ error: 'Missing required fields (participantId and either templateId or textContent)' }, { status: 400 });
         }
 
         // Resolve retro
@@ -26,18 +26,24 @@ export async function POST(
 
         // Generate URL
         // lines defaults to empty array
+        // Generate URL only if template is present
+        let generatedImageUrl = '';
         const imageLines = Array.isArray(lines) ? lines : [];
-        const generatedImageUrl = MemegenClient.buildMemeUrl(templateId, imageLines);
+
+        if (templateId) {
+            generatedImageUrl = MemegenClient.buildMemeUrl(templateId, imageLines);
+        }
 
         const meme = await prisma.memeEntry.create({
             data: {
                 retroId: retro.id,
                 participantId,
                 laneId, // Optional, can be null
-                templateId,
+                templateId: templateId || null,
                 topText: imageLines[0] || '',
                 bottomText: imageLines[1] || '',
-                generatedImageUrl,
+                textContent: textContent || null,
+                generatedImageUrl: generatedImageUrl || null,
                 reactions: '{}',
             },
             include: {
