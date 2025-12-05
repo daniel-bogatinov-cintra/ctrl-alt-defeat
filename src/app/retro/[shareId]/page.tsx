@@ -251,7 +251,7 @@ export default function RetroPage() {
                                 <Chip label={filteredMemes[lane.id]?.length || 0} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
                             </Box>
 
-                            <Stack spacing={2} sx={{ overflowY: 'auto', flexGrow: 1, pr: 1, pb: 10 }}>
+                            <Stack spacing={2} sx={{ overflowY: 'auto', flexGrow: 1, flexShrink: 1, pr: 1, pb: 2, minHeight: 0 }}>
                                 {filteredMemes[lane.id]?.map((meme: MemeEntry) => (
                                     <MemeCard
                                         key={meme.id}

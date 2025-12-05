@@ -32,7 +32,8 @@ export default function MemeCard({ meme, onReact, onDelete, onClick }: Props) {
                 '&:hover .delete-btn': { opacity: 1 },
                 cursor: onClick ? 'pointer' : 'default',
                 transition: 'transform 0.2s',
-                '&:hover': onClick ? { transform: 'scale(1.02)' } : {}
+                '&:hover': onClick ? { transform: 'scale(1.02)' } : {},
+                flexShrink: 0
             }}
         >
             <IconButton
