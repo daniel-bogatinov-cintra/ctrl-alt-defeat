@@ -14,6 +14,8 @@ import ShareIcon from '@mui/icons-material/Share';
 import AddIcon from '@mui/icons-material/Add';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DownloadIcon from '@mui/icons-material/Download';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Lane, MemeEntry, Participant } from '@/types';
 import MemeCard from '@/components/MemeCard';
 import MemeCreator from '@/components/MemeCreator';
@@ -48,6 +50,8 @@ export default function RetroPage() {
     const [viewingMeme, setViewingMeme] = useState<MemeEntry | null>(null);
     const [endRetroDialogOpen, setEndRetroDialogOpen] = useState(false);
     const [outrageScore, setOutrageScore] = useState(1);
+    const [focusModeOpen, setFocusModeOpen] = useState(false);
+    const [focusMemeIndex, setFocusMemeIndex] = useState(0);
 
     const storedParticipant = retro && participantsMap[retro.id];
     // Re-find from server to get _count
@@ -225,6 +229,18 @@ export default function RetroPage() {
     if (error) return <Box p={4}><Typography color="error">Failed to load retro.</Typography></Box>;
     if (!retro) return <Box p={4} textAlign="center"><Typography>Loading the vibes...</Typography></Box>;
 
+    // Sort memes by total votes for focus mode
+    const sortedMemesByVotes = useMemo(() => {
+        if (!retro.memes) return [];
+        return [...retro.memes].sort((a, b) => {
+            const aReactions = JSON.parse(a.reactions || '{}');
+            const bReactions = JSON.parse(b.reactions || '{}');
+            const aTotal = Object.values(aReactions).reduce((sum: number, count) => sum + (count as number), 0);
+            const bTotal = Object.values(bReactions).reduce((sum: number, count) => sum + (count as number), 0);
+            return bTotal - aTotal; // Descending order
+        });
+    }, [retro.memes]);
+
     return (
         <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
             {/* Header */}
@@ -302,6 +318,18 @@ export default function RetroPage() {
                         sx={{ borderRadius: 6, mr: 1 }}
                     >
                         Export PDF
+                    </Button>
+                    <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => {
+                            setFocusMemeIndex(0);
+                            setFocusModeOpen(true);
+                        }}
+                        sx={{ borderRadius: 6, mr: 1 }}
+                        disabled={sortedMemesByVotes.length === 0}
+                    >
+                        FOCUS
                     </Button>
                     <Button
                         variant="contained"
@@ -930,6 +958,135 @@ export default function RetroPage() {
                         End Retro
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            {/* Focus Mode Modal */}
+            <Dialog
+                open={focusModeOpen}
+                onClose={() => setFocusModeOpen(false)}
+                maxWidth="lg"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                        backgroundImage: 'none',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        m: 2
+                    }
+                }}
+            >
+                {sortedMemesByVotes.length > 0 && (() => {
+                    const currentMeme = sortedMemesByVotes[focusMemeIndex];
+                    const reactions = JSON.parse(currentMeme.reactions || '{}');
+                    const totalVotes = Object.values(reactions).reduce((sum: number, count) => sum + (count as number), 0);
+
+                    return (
+                        <>
+                            <DialogTitle sx={{
+                                fontWeight: 800,
+                                fontSize: '1.75rem',
+                                textAlign: 'center',
+                                pb: 1
+                            }}>
+                                🔥 No going back now! 🔥
+                            </DialogTitle>
+                            <DialogContent sx={{
+                                p: 3,
+                                position: 'relative',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                minHeight: 400
+                            }}>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'center' }}>
+                                    Meme {focusMemeIndex + 1} of {sortedMemesByVotes.length} • {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+                                </Typography>
+
+                                {currentMeme.generatedImageUrl ? (
+                                    <Box
+                                        component="img"
+                                        src={currentMeme.generatedImageUrl}
+                                        alt="Meme"
+                                        sx={{
+                                            width: '100%',
+                                            height: 'auto',
+                                            maxHeight: '60vh',
+                                            maxWidth: '100%',
+                                            objectFit: 'contain',
+                                            bgcolor: '#000',
+                                            borderRadius: 2
+                                        }}
+                                    />
+                                ) : (
+                                    <Box sx={{
+                                        width: '100%',
+                                        minHeight: 300,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        p: 4,
+                                        bgcolor: '#fef3c7',
+                                        color: '#4b5563',
+                                        borderRadius: 2
+                                    }}>
+                                        <Typography
+                                            variant="h4"
+                                            sx={{
+                                                fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif',
+                                                lineHeight: 1.4,
+                                                wordBreak: 'break-word',
+                                                fontStyle: 'italic',
+                                                textAlign: 'center',
+                                                maxWidth: '90%'
+                                            }}
+                                        >
+                                            "{currentMeme.textContent}"
+                                        </Typography>
+                                    </Box>
+                                )}
+
+                                {currentMeme.description && (
+                                    <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(139, 92, 246, 0.1)', borderRadius: 2, border: '1px solid rgba(139, 92, 246, 0.3)', width: '100%' }}>
+                                        <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 'bold', textTransform: 'uppercase', mb: 0.5, display: 'block' }}>
+                                            Description
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                            {currentMeme.description}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </DialogContent>
+                            <DialogActions sx={{ p: 3, pt: 2, justifyContent: 'space-between', bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                <Button
+                                    startIcon={<ChevronLeftIcon />}
+                                    onClick={() => setFocusMemeIndex(Math.max(0, focusMemeIndex - 1))}
+                                    disabled={focusMemeIndex === 0}
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2 }}
+                                >
+                                    Previous
+                                </Button>
+                                <Button
+                                    onClick={() => setFocusModeOpen(false)}
+                                    variant="contained"
+                                    sx={{ borderRadius: 2, px: 4, fontWeight: 'bold' }}
+                                >
+                                    Close
+                                </Button>
+                                <Button
+                                    endIcon={<ChevronRightIcon />}
+                                    onClick={() => setFocusMemeIndex(Math.min(sortedMemesByVotes.length - 1, focusMemeIndex + 1))}
+                                    disabled={focusMemeIndex === sortedMemesByVotes.length - 1}
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2 }}
+                                >
+                                    Next
+                                </Button>
+                            </DialogActions>
+                        </>
+                    );
+                })()}
             </Dialog>
         </Box >
     );
