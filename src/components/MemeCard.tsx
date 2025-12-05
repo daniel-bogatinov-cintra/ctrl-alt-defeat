@@ -8,11 +8,12 @@ interface Props {
     meme: MemeEntry;
     onReact: (emoji: string) => void;
     onDelete: () => void;
+    onClick?: () => void;
 }
 
 const REACTION_OPTIONS = ['🔥', '😂', '💀', '✅'];
 
-export default function MemeCard({ meme, onReact, onDelete }: Props) {
+export default function MemeCard({ meme, onReact, onDelete, onClick }: Props) {
     let reactions: Record<string, number> = {};
     try {
         reactions = JSON.parse(meme.reactions);
@@ -24,7 +25,15 @@ export default function MemeCard({ meme, onReact, onDelete }: Props) {
             layout
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            sx={{ overflow: 'hidden', position: 'relative', '&:hover .delete-btn': { opacity: 1 } }}
+            onClick={onClick}
+            sx={{
+                overflow: 'hidden',
+                position: 'relative',
+                '&:hover .delete-btn': { opacity: 1 },
+                cursor: onClick ? 'pointer' : 'default',
+                transition: 'transform 0.2s',
+                '&:hover': onClick ? { transform: 'scale(1.02)' } : {}
+            }}
         >
             <IconButton
                 className="delete-btn"
@@ -101,7 +110,10 @@ export default function MemeCard({ meme, onReact, onDelete }: Props) {
                     {REACTION_OPTIONS.map(emoji => (
                         <Box
                             key={emoji}
-                            onClick={() => onReact(emoji)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onReact(emoji);
+                            }}
                             component={motion.button}
                             whileTap={{ scale: 0.9 }}
                             sx={{

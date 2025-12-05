@@ -41,6 +41,7 @@ export default function RetroPage() {
     const [currentLaneId, setCurrentLaneId] = useState<string>('');
     const [showShareToast, setShowShareToast] = useState(false);
     const [customLaneTitles, setCustomLaneTitles] = useState<Record<string, string>>({});
+    const [viewingMeme, setViewingMeme] = useState<MemeEntry | null>(null);
 
     const storedParticipant = retro && participantsMap[retro.id];
     // Re-find from server to get _count
@@ -257,6 +258,7 @@ export default function RetroPage() {
                                         meme={meme}
                                         onReact={(emoji) => handleReact(meme.id, emoji)}
                                         onDelete={() => handleDelete(meme.id)}
+                                        onClick={() => setViewingMeme(meme)}
                                     />
                                 ))}
 
@@ -532,6 +534,83 @@ export default function RetroPage() {
                         Delete
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={!!viewingMeme}
+                onClose={() => setViewingMeme(null)}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                        backgroundImage: 'none',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }
+                }}
+            >
+                {viewingMeme && (
+                    <>
+                        <DialogContent sx={{ p: 0, position: 'relative' }}>
+                            {viewingMeme.generatedImageUrl ? (
+                                <Box
+                                    component="img"
+                                    src={viewingMeme.generatedImageUrl}
+                                    alt="Meme"
+                                    sx={{
+                                        width: '100%',
+                                        height: 'auto',
+                                        maxHeight: '70vh',
+                                        objectFit: 'contain',
+                                        bgcolor: '#000'
+                                    }}
+                                />
+                            ) : (
+                                <Box sx={{
+                                    minHeight: 400,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    p: 6,
+                                    bgcolor: '#fef3c7',
+                                    color: '#4b5563'
+                                }}>
+                                    <Typography
+                                        variant="h4"
+                                        sx={{
+                                            fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif',
+                                            lineHeight: 1.4,
+                                            wordBreak: 'break-word',
+                                            fontStyle: 'italic',
+                                            textAlign: 'center'
+                                        }}
+                                    >
+                                        "{viewingMeme.textContent}"
+                                    </Typography>
+                                </Box>
+                            )}
+                        </DialogContent>
+                        <DialogActions sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.02)' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 'auto' }}>
+                                <Box sx={{
+                                    width: 32, height: 32, borderRadius: '50%',
+                                    bgcolor: viewingMeme.participant?.avatarColor || '#777',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '0.9rem', fontWeight: 'bold'
+                                }}>
+                                    {viewingMeme.participant?.displayName?.[0] || '?'}
+                                </Box>
+                                <Typography variant="body2" fontWeight="600">
+                                    {viewingMeme.participant?.displayName}
+                                </Typography>
+                            </Box>
+                            <Button onClick={() => setViewingMeme(null)} variant="contained" sx={{ borderRadius: 2 }}>
+                                Close
+                            </Button>
+                        </DialogActions>
+                    </>
+                )}
             </Dialog>
         </Box >
     );
